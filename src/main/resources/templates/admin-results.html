@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - All Results</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <style>
+        body { background: #f0f2f5; font-family: Arial, sans-serif; }
+        .navbar-custom { background: #333; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .navbar-custom span { color: white; font-size: 18px; font-weight: bold; }
+        .navbar-custom a { color: #ccc; text-decoration: none; margin-left: 15px; font-size: 15px; }
+        .navbar-custom a:hover { color: white; }
+        .table th { background: #333; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="navbar-custom">
+    <span>⚙️ Admin Panel</span>
+    <div>
+        <a th:href="@{/admin}">← Back to Admin</a>
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="mb-1">📊 All Quiz Results</h4>
+            <p class="text-muted mb-4">
+                All user quiz attempts sorted by score.
+                Total attempts: <strong th:text="${#lists.size(results)}">0</strong>
+            </p>
+
+            <div th:if="${#lists.isEmpty(results)}" class="alert alert-info">
+                No quiz attempts yet.
+            </div>
+
+            <div class="table-responsive" th:unless="${#lists.isEmpty(results)}">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Username</th>
+                            <th>Quiz Title</th>
+                            <th>Score</th>
+                            <th>Total Questions</th>
+                            <th>Percentage</th>
+                            <th>Attempt Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="result, stat : ${results}">
+                            <td th:text="${stat.index + 1}">1</td>
+                            <td th:text="${result.user.username}">User</td>
+                            <td th:text="${result.quiz.title}">Quiz</td>
+                            <td><strong th:text="${result.score}">0</strong></td>
+                            <td th:text="${result.totalQuestions}">0</td>
+                            <td>
+                                <span th:with="pct=${result.score * 100 / result.totalQuestions}"
+                                      th:classappend="${pct >= 70} ? 'badge bg-success' : (${pct >= 40} ? 'badge bg-warning text-dark' : 'badge bg-danger')"
+                                      th:text="${pct} + '%'">0%</span>
+                            </td>
+                            <td th:text="${#temporals.format(result.attemptedAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

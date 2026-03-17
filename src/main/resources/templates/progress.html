@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Progress - Online Quiz App</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #4CAF50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 20px; }
+        .navbar a { color: white; text-decoration: none; margin-left: 15px; }
+        h2 { color: #333; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        th { background: #2196F3; color: white; padding: 12px 15px; text-align: left; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #f5f5f5; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 13px; color: white; }
+        .badge-green { background: #4CAF50; }
+        .badge-orange { background: #FF9800; }
+        .badge-red { background: #f44336; }
+        .empty { text-align: center; color: #888; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <span>📊 My Progress</span>
+    <div>
+        <a th:href="@{/dashboard}">🏠 Dashboard</a>
+        <a th:href="@{/leaderboard}">🏆 Leaderboard</a>
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+</div>
+
+<h2>Quiz History for <span th:text="${user.username}"></span></h2>
+
+<div th:if="${#lists.isEmpty(results)}" class="empty">
+    <p>You haven't attempted any quizzes yet. <a th:href="@{/dashboard}">Start one now!</a></p>
+</div>
+
+<table th:unless="${#lists.isEmpty(results)}">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Quiz</th>
+            <th>Score</th>
+            <th>Percentage</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="result, stat : ${results}">
+            <td th:text="${stat.index + 1}">1</td>
+            <td th:text="${result.quiz.title}">Quiz Name</td>
+            <td th:text="${result.score} + ' / ' + ${result.totalQuestions}">0/0</td>
+            <td>
+                <span th:with="pct=${#numbers.formatDecimal(result.score * 100.0 / result.totalQuestions, 1, 0)}"
+                      th:class="${result.score * 100 / result.totalQuestions >= 70} ? 'badge badge-green' : (${result.score * 100 / result.totalQuestions >= 40} ? 'badge badge-orange' : 'badge badge-red')"
+                      th:text="${pct} + '%'">0%</span>
+            </td>
+            <td th:text="${#temporals.format(result.attemptedAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

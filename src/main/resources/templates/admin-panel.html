@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - Online Quiz App</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #333; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 20px; }
+        .navbar a { color: #ccc; text-decoration: none; margin-left: 15px; }
+        .section { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2, h3 { color: #333; }
+        input[type="text"], textarea { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; color: white; font-size: 14px; }
+        .btn-blue { background: #2196F3; }
+        .btn-green { background: #4CAF50; }
+        .btn-red { background: #f44336; }
+        .btn-orange { background: #FF9800; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #333; color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <span>⚙️ Admin Panel</span>
+    <div>
+        <a th:href="@{/admin/results}" style="color:#90EE90;">📊 View Results</a>
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+</div>
+
+<!-- Create New Quiz -->
+<div class="section">
+    <h3>➕ Create New Quiz</h3>
+    <form th:action="@{/admin/quiz/create}" method="post" th:object="${newQuiz}">
+        <input type="text" th:field="*{title}" placeholder="Quiz Title" required />
+        <input type="text" th:field="*{description}" placeholder="Quiz Description" />
+        <button type="submit" class="btn btn-green">Create Quiz</button>
+    </form>
+</div>
+
+<!-- All Quizzes List -->
+<div class="section">
+    <h3>📋 All Quizzes</h3>
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Title</th><th>Description</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            <tr th:each="quiz : ${quizzes}">
+                <td th:text="${quiz.id}">1</td>
+                <td th:text="${quiz.title}">Title</td>
+                <td th:text="${quiz.description}">Desc</td>
+                <td>
+                    <a th:href="@{/admin/quiz/edit/{id}(id=${quiz.id})}" class="btn btn-orange">Edit / Add Questions</a>
+                    <form th:action="@{/admin/quiz/delete/{id}(id=${quiz.id})}" method="post" style="display:inline">
+                        <button type="submit" class="btn btn-red" onclick="return confirm('Delete this quiz?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Edit Quiz & Manage Questions (shown when editing) -->
+<div class="section" th:if="${quiz != null}">
+    <h3>✏️ Edit Quiz: <span th:text="${quiz.title}"></span></h3>
+
+    <!-- Update quiz details -->
+    <form th:action="@{/admin/quiz/update/{id}(id=${quiz.id})}" method="post">
+        <input type="text" name="title" th:value="${quiz.title}" placeholder="Quiz Title" required />
+        <input type="text" name="description" th:value="${quiz.description}" placeholder="Description" />
+        <button type="submit" class="btn btn-blue">Update Quiz</button>
+    </form>
+
+    <hr style="margin: 20px 0;" />
+
+    <!-- Add new question -->
+    <h3>➕ Add Question</h3>
+    <form th:action="@{/admin/quiz/{id}/question/add(id=${quiz.id})}" method="post">
+        <input type="text" name="questionText" placeholder="Question Text" required />
+        <div class="form-row">
+            <input type="text" name="option1" placeholder="Option 1" required />
+            <input type="text" name="option2" placeholder="Option 2" required />
+            <input type="text" name="option3" placeholder="Option 3" required />
+            <input type="text" name="option4" placeholder="Option 4" required />
+        </div>
+        <input type="text" name="correctAnswer" placeholder="Correct Answer (must exactly match one option above)" required />
+        <button type="submit" class="btn btn-green">Add Question</button>
+    </form>
+
+    <hr style="margin: 20px 0;" />
+
+    <!-- Existing questions -->
+    <h3>📝 Questions in this Quiz</h3>
+    <div th:if="${#lists.isEmpty(questions)}"><p>No questions yet.</p></div>
+    <table th:unless="${#lists.isEmpty(questions)}">
+        <thead>
+            <tr><th>#</th><th>Question</th><th>Options</th><th>Answer</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+            <tr th:each="q, stat : ${questions}">
+                <td th:text="${stat.index + 1}">1</td>
+                <td th:text="${q.questionText}">Q</td>
+                <td>
+                    <small>
+                        1: <span th:text="${q.option1}"></span><br/>
+                        2: <span th:text="${q.option2}"></span><br/>
+                        3: <span th:text="${q.option3}"></span><br/>
+                        4: <span th:text="${q.option4}"></span>
+                    </small>
+                </td>
+                <td th:text="${q.correctAnswer}">Answer</td>
+                <td>
+                    <form th:action="@{/admin/question/delete/{qid}(qid=${q.id})}" method="post">
+                        <input type="hidden" name="quizId" th:value="${quiz.id}" />
+                        <button type="submit" class="btn btn-red" onclick="return confirm('Delete question?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

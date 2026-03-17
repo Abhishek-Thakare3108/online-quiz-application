@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Result - Online Quiz App</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 3rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); text-align: center; width: 400px; }
+        .score-circle { width: 150px; height: 150px; border-radius: 50%; background: #4CAF50; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 20px auto; }
+        .score-circle .score-num { font-size: 48px; font-weight: bold; }
+        .score-circle .score-label { font-size: 14px; }
+        h2 { color: #333; }
+        .quiz-name { color: #666; margin-bottom: 20px; }
+        .percentage { font-size: 24px; color: #333; margin: 10px 0; }
+        .message { color: #555; margin: 15px 0; font-size: 16px; }
+        .btn { display: inline-block; padding: 12px 25px; background: #2196F3; color: white; text-decoration: none; border-radius: 6px; margin: 8px; }
+        .btn-green { background: #4CAF50; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>🎉 Quiz Completed!</h2>
+    <p class="quiz-name" th:text="${quiz.title}">Quiz Name</p>
+
+    <div class="score-circle">
+        <span class="score-num" th:text="${score}">0</span>
+        <span class="score-label">out of <span th:text="${total}">0</span></span>
+    </div>
+
+    <p class="percentage">
+        Score: <strong th:text="${#numbers.formatDecimal(score * 100.0 / total, 1, 1)} + '%'">0%</strong>
+    </p>
+
+    <!-- Motivational message based on score -->
+    <p class="message" th:if="${score == total}">🏆 Perfect Score! Outstanding!</p>
+    <p class="message" th:if="${score != total and score * 10 >= total * 7}">👍 Great job! Keep it up!</p>
+    <p class="message" th:if="${score * 10 < total * 7}">📚 Keep practicing, you'll do better!</p>
+
+    <div>
+        <a th:href="@{/dashboard}" class="btn">Back to Dashboard</a>
+        <a th:href="@{/progress}" class="btn btn-green">View Progress</a>
+    </div>
+</div>
+</body>
+</html>

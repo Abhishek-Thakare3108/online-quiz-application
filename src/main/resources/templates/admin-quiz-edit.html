@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Quiz - Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <style>
+        body { background: #f0f2f5; }
+        .navbar-brand { font-weight: bold; }
+        .card { border-radius: 10px; }
+        .table th { background: #343a40; color: white; }
+        .badge-answer { background: #198754; color: white; padding: 3px 10px; border-radius: 12px; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-dark px-4 mb-4">
+    <span class="navbar-brand">⚙️ Admin Panel</span>
+    <div>
+        <a th:href="@{/admin}" class="btn btn-outline-light btn-sm me-2">← Back to Admin</a>
+        <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <!-- Quiz Title + Update Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title mb-3">
+                ✏️ Editing Quiz: <span class="text-primary" th:text="${quiz.title}">Quiz Title</span>
+            </h4>
+            <form th:action="@{/admin/quiz/update/{id}(id=${quiz.id})}" method="post" class="row g-2">
+                <div class="col-md-5">
+                    <input type="text" name="title" class="form-control"
+                           th:value="${quiz.title}" placeholder="Quiz Title" required/>
+                </div>
+                <div class="col-md-5">
+                    <input type="text" name="description" class="form-control"
+                           th:value="${quiz.description}" placeholder="Description"/>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add New Question Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">➕ Add New Question</h5>
+            <form th:action="@{/admin/quiz/{id}/question(id=${quiz.id})}" method="post">
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Question Text</label>
+                    <input type="text" name="questionText" class="form-control"
+                           placeholder="Enter your question here..." required/>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Option 1</label>
+                        <input type="text" name="option1" class="form-control" placeholder="Option 1" required/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Option 2</label>
+                        <input type="text" name="option2" class="form-control" placeholder="Option 2" required/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Option 3</label>
+                        <input type="text" name="option3" class="form-control" placeholder="Option 3" required/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Option 4</label>
+                        <input type="text" name="option4" class="form-control" placeholder="Option 4" required/>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-success">✅ Correct Answer</label>
+                    <input type="text" name="correctAnswer" class="form-control"
+                           placeholder="Must exactly match one of the options above" required/>
+                    <div class="form-text">e.g. if Option 2 is "Paris", type "Paris" here.</div>
+                </div>
+
+                <button type="submit" class="btn btn-success">Save Question</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Existing Questions Table -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                📝 Questions
+                <span class="badge bg-secondary ms-2" th:text="${#lists.size(questions)}">0</span>
+            </h5>
+
+            <!-- No questions yet -->
+            <div th:if="${#lists.isEmpty(questions)}" class="alert alert-info">
+                No questions added yet. Use the form above to add your first question!
+            </div>
+
+            <!-- Questions table -->
+            <div class="table-responsive" th:unless="${#lists.isEmpty(questions)}">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Question</th>
+                            <th>Option 1</th>
+                            <th>Option 2</th>
+                            <th>Option 3</th>
+                            <th>Option 4</th>
+                            <th>Correct Answer</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="q, stat : ${questions}">
+                            <td th:text="${stat.index + 1}">1</td>
+                            <td th:text="${q.questionText}">Question</td>
+                            <td th:text="${q.option1}">Opt1</td>
+                            <td th:text="${q.option2}">Opt2</td>
+                            <td th:text="${q.option3}">Opt3</td>
+                            <td th:text="${q.option4}">Opt4</td>
+                            <td>
+                                <span class="badge-answer" th:text="${q.correctAnswer}">Answer</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/question/delete/{qid}(qid=${q.id})}" method="post"
+                                      onsubmit="return confirm('Delete this question?')">
+                                    <input type="hidden" name="quizId" th:value="${quiz.id}"/>
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

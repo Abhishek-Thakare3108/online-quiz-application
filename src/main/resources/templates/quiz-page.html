@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${quiz.title} + ' - Quiz'">Quiz</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 750px; margin: 0 auto; }
+        .header { background: #2196F3; color: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 20px; }
+        .question-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .question-card h3 { color: #333; margin-bottom: 15px; }
+        .option { display: block; padding: 10px 15px; margin: 8px 0; border: 2px solid #ddd; border-radius: 4px; cursor: pointer; }
+        .option:hover { border-color: #2196F3; background: #e3f2fd; }
+        input[type="radio"] { margin-right: 10px; }
+        .submit-btn { width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
+        .submit-btn:hover { background: #45a049; }
+        .back { display: inline-block; margin-bottom: 15px; color: #2196F3; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <a th:href="@{/dashboard}" class="back">← Back to Dashboard</a>
+
+    <div class="header">
+        <h2 th:text="${quiz.title}">Quiz Title</h2>
+        <p th:text="${quiz.description}">Description</p>
+        <p style="margin:0; font-size:14px;">Total Questions: <strong th:text="${#lists.size(questions)}">0</strong></p>
+    </div>
+
+    <form th:action="@{/quiz/{id}/submit(id=${quiz.id})}" method="post">
+
+        <div class="question-card" th:each="question, stat : ${questions}">
+            <h3>
+                <span th:text="${stat.index + 1} + '. '"></span>
+                <span th:text="${question.questionText}">Question text</span>
+            </h3>
+
+            <!-- Option 1 -->
+            <label class="option">
+                <input type="radio" th:name="'answer_' + ${question.id}" th:value="${question.option1}" required />
+                <span th:text="${question.option1}">Option 1</span>
+            </label>
+            <!-- Option 2 -->
+            <label class="option">
+                <input type="radio" th:name="'answer_' + ${question.id}" th:value="${question.option2}" />
+                <span th:text="${question.option2}">Option 2</span>
+            </label>
+            <!-- Option 3 -->
+            <label class="option">
+                <input type="radio" th:name="'answer_' + ${question.id}" th:value="${question.option3}" />
+                <span th:text="${question.option3}">Option 3</span>
+            </label>
+            <!-- Option 4 -->
+            <label class="option">
+                <input type="radio" th:name="'answer_' + ${question.id}" th:value="${question.option4}" />
+                <span th:text="${question.option4}">Option 4</span>
+            </label>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Quiz 🚀</button>
+    </form>
+
+</div>
+</body>
+</html>

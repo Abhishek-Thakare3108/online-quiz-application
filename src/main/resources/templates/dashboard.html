@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Online Quiz App</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #4CAF50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 20px; }
+        .navbar a { color: white; text-decoration: none; margin-left: 15px; }
+        h2 { color: #333; }
+        .quiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .quiz-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .quiz-card h3 { margin: 0 0 10px; color: #333; }
+        .quiz-card p { color: #666; font-size: 14px; }
+        .btn { display: inline-block; padding: 8px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 4px; margin-top: 10px; }
+        .btn:hover { background: #45a049; }
+        .btn-orange { display: inline-block; padding: 8px 16px; background: #FF9800; color: white; text-decoration: none; border-radius: 4px; margin-top: 10px; font-size: 14px; }
+        .btn-orange:hover { background: #e68900; }
+        .btn-red { display: inline-block; padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; margin-top: 10px; font-size: 14px; cursor: pointer; }
+        .btn-red:hover { background: #d32f2f; }
+        .btn-disabled { display: inline-block; padding: 8px 20px; background: #aaa; color: white; border-radius: 4px; margin-top: 10px; cursor: not-allowed; font-size: 14px; }
+        .attempted-badge { display: inline-block; margin-top: 6px; font-size: 12px; color: #888; }
+        .alert-error { background: #ffe0e0; color: #c0392b; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #e74c3c; }
+        .admin-badge { display: inline-block; background: #333; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+        .empty { text-align: center; color: #888; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <span>🎯 Online Quiz App</span>
+    <div>
+        <span>Welcome, <strong th:text="${user.username}"></strong>!
+            <span class="admin-badge" th:if="${user.role == 'ADMIN'}">ADMIN</span>
+        </span>
+        <!-- ADMIN navbar links -->
+        <th:block th:if="${user.role == 'ADMIN'}">
+            <a th:href="@{/admin}">⚙️ Admin Panel</a>
+            <a th:href="@{/admin/results}">📊 All Results</a>
+            <a th:href="@{/leaderboard}">🏆 Leaderboard</a>
+        </th:block>
+        <!-- USER navbar links -->
+        <th:block th:unless="${user.role == 'ADMIN'}">
+            <a th:href="@{/leaderboard}">🏆 Leaderboard</a>
+            <a th:href="@{/progress}">📊 My Progress</a>
+        </th:block>
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+</div>
+
+<h2>Available Quizzes
+    <span th:if="${user.role == 'ADMIN'}" style="font-size:14px; color:#888; font-weight:normal;"> — Admin View (manage quizzes below)</span>
+</h2>
+
+<!-- Error message (e.g. already attempted, no questions) -->
+<div th:if="${error}" class="alert-error" th:text="${error}"></div>
+
+<div th:if="${#lists.isEmpty(quizzes)}" class="empty">
+    <p>No quizzes available yet. Check back later!</p>
+</div>
+
+<div class="quiz-grid" th:unless="${#lists.isEmpty(quizzes)}">
+    <div class="quiz-card" th:each="quiz : ${quizzes}">
+        <h3 th:text="${quiz.title}">Quiz Title</h3>
+        <p th:text="${quiz.description}">Quiz description goes here.</p>
+        <!-- ADMIN: show Edit and Delete actions -->
+        <th:block th:if="${user.role == 'ADMIN'}">
+            <a th:href="@{/admin/quiz/edit/{id}(id=${quiz.id})}" class="btn-orange">✏️ Edit / Add Questions</a>
+            <form th:action="@{/admin/quiz/delete/{id}(id=${quiz.id})}" method="post" style="display:inline">
+                <button type="submit" class="btn-red" onclick="return confirm('Delete this quiz?')">🗑 Delete</button>
+            </form>
+        </th:block>
+
+        <!-- USER: show Start Quiz or Already Attempted -->
+        <th:block th:unless="${user.role == 'ADMIN'}">
+            <span th:if="${attemptedQuizIds != null and attemptedQuizIds.contains(quiz.id)}">
+                <span class="btn-disabled">✅ Already Attempted</span>
+                <br/><span class="attempted-badge">View score in <a th:href="@{/progress}">My Progress</a></span>
+            </span>
+            <a th:unless="${attemptedQuizIds != null and attemptedQuizIds.contains(quiz.id)}"
+               th:href="@{/quiz/{id}(id=${quiz.id})}" class="btn">Start Quiz →</a>
+        </th:block>
+    </div>
+</div>
+
+</body>
+</html>
